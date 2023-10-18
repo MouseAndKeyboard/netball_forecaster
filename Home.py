@@ -4,6 +4,8 @@ from PIL import Image
 st.set_page_config(layout="wide")
 
 st.info("Select your division on the left sidebar to get started!")
+st.warning("Select your division on the left sidebar to get started!!!")
+st.error("Select your division on the left sidebar to get started! Or scroll down for more information")
 
 image = Image.open("./cover_image.png")
 st.image(image, use_column_width="auto")
