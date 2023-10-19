@@ -89,11 +89,19 @@ def scrape_sports_url(url):
 
 if __name__ == "__main__":
     urls = [
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1474766&seasonid=1125',
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1474767&seasonid=1125',
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1474768&seasonid=1125',
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1489115&seasonid=1125',
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1489116&seasonid=1125'
+        # tuesday league
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1474766&seasonid=1125', # D1
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1474767&seasonid=1125', # D2 
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1474768&seasonid=1125', # D3
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1489115&seasonid=1125', # D4
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1489116&seasonid=1125', # D5
+        # monday league
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1489111&seasonid=1125', # D7
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1474764&seasonid=1125', # D6
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1474763&seasonid=1125', # D5
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1474762&seasonid=1125', # D4
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1474761&seasonid=1125', # D3
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1474760&seasonid=1125', # D2
     ]
 
     for url in urls:
