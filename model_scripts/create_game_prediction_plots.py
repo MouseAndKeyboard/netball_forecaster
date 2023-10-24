@@ -25,16 +25,19 @@ for file in os.listdir(OUTPUTS_DIR):
 
         id_to_name = pd.read_csv(ID_TO_NAME_DIR / file)
 
-        yrep = [[[f'y_rep.{i}.{j}.{k}' for k in range(1, 3)] for i in range(1, 7)] for j in range(1, 7)]
+        T = len(id_to_name)
+
+        yrep = [[[f'y_rep.{i}.{j}.{k}' for k in range(1, 3)] for i in range(1, T + 1)] for j in range(1, T + 1)]
         team_names = id_to_name['Team_Name'].values
 
-        colours = ['Reds', 'Blues', 'Greens', 'Purples', 'pink', 'Oranges']
-        solo_colours = ['red', 'blue', 'green', 'purple', 'pink', 'orange']
+        colours = ['Reds', 'Blues', 'Greens', 'Purples', 'pink', 'Oranges', 'crest', 'viridis']
+        solo_colours = ['red', 'blue', 'green', 'purple', 'pink', 'orange', 'blue', 'green']
 
+        colours = colours[:T]
+        solo_colours = solo_colours[:T]
 
-
-        for i in range(6):
-            for j in range(6):
+        for i in range(T):
+            for j in range(T):
                 home_goals = df[yrep[i][j][1]]
                 away_goals = df[yrep[i][j][0]]
 
