@@ -57,13 +57,18 @@ def fit_stan_model(df, progressive = False):
             print(offence_means)
             print(defence_means)
             print(T)
-
             # scatter plot the mean values
-            plt.scatter(offence_means, defence_means, c="black", s=200)
-            plt.show()
-            plt.cla()
+            # plt.scatter(offence_means, defence_means, c="black", s=200)
+            # plt.show()
+            # plt.cla()
+    else:
+        stan_data['N'] = N
+        stan_data['goals'] = df[['home_score', 'away_score']].values
+        stan_data['team_1'] = df['Team_1_ID'].values
+        stan_data['team_2'] = df['Team_2_ID'].values
+        posterior = stan.build(model_code, data=stan_data)
+        fit = posterior.sample(num_chains=4, num_samples=1000) 
         
-        exit(1)
 
     return fit
 
@@ -77,6 +82,6 @@ if __name__ == "__main__":
             data = data[data['bye'] == False]
 
             print(data.columns)
-            fit = fit_stan_model(data, progressive=True)
+            fit = fit_stan_model(data, progressive=False)
 
             fit.to_frame().to_csv(f'./model_scripts/outputs/{filename}', index=False)

@@ -10,7 +10,7 @@ ID_TO_NAME_DIR = Path('./model_scripts/id_to_name')
 
 # loop through each csv file in outputs directory
 
-MAKE_PLOTS = False
+MAKE_PLOTS = True
 
 predictions_df = []
 for file in os.listdir(OUTPUTS_DIR):
