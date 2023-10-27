@@ -14,12 +14,12 @@ def scrape_uwa_sports_page(url):
     bracket = smalls[0].get_text(strip=True)
     
     rounds = soup.find_all('h3')
-    for round_header in rounds:
+    for round_index, round_header in enumerate(rounds):
         round_name = round_header.get_text(strip=True)
         
         table = round_header.find_next('table')
         rows = table.find_all('tr', class_='withIcon')
-        
+        print(round_index, round_name)
         for row in rows:
             home_team_data = row.find_all('td', class_='team')[0].get_text(strip=True).rsplit(' -', 1)
             away_team_data = row.find_all('td', class_='team')[1].get_text(strip=True).rsplit(' -', 1)
@@ -34,6 +34,7 @@ def scrape_uwa_sports_page(url):
             if (home_team == 'Bye') or (away_team == 'Bye'):
                 rounds_data.append({
                     "bracket": bracket,
+                    "round_index": round_index,
                     "round": round_name,
                     "home_team": home_team,
                     "away_team": away_team,
@@ -52,6 +53,7 @@ def scrape_uwa_sports_page(url):
             
             rounds_data.append({
                 "bracket": bracket,
+                "round_index": round_index,
                 "round": round_name,
                 "home_team": home_team,
                 "away_team": away_team,
