@@ -3,85 +3,67 @@ import stan
 import matplotlib.pyplot as plt
 import os
 import seaborn as sns
-import matplotlib.pyplot as plt
+from pathlib import Path
 
-def fit_stan_model(df, progressive = False):
-    # Create table of all unique teams
-    teams = pd.DataFrame()
-    teams['Team_Name'] = pd.concat([df['home_team'], df['away_team']])
-    teams = teams.drop_duplicates().reset_index(drop=True)
-
-    teams['Team_ID'] = teams.index
-
-    # the team Ids actually need to start from 1 to work in Stan
-    teams['Team_ID'] = teams['Team_ID'] + 1
-
-    print(teams)
-
-    teams.to_csv(f'./model_scripts/id_to_name/{df.iloc[0]["bracket"]}.csv', index=False)
-
-    # Add team IDs to games table
-    df = pd.merge(df, teams, left_on='home_team', right_on='Team_Name', how='left')
-    df = df.rename(columns={'Team_ID': 'Team_1_ID'})
-    df = pd.merge(df, teams, left_on='away_team', right_on='Team_Name', how='left')
-    df = df.rename(columns={'Team_ID': 'Team_2_ID'})
-    
-    # number of rounds
-    N = len(df)
-
-    # number of teams
-    T = len(teams)
+def fit_model(N, T, goals, team_1, team_2):
+    # read the code from netball.stan
+    model_code = open('./model_scripts/netball.stan').read()
 
     stan_data = {
         'N': N,
-        'goals': df[['home_score', 'away_score']].values,
-        'team_1': df['Team_1_ID'].values,
-        'team_2': df['Team_2_ID'].values,
+        'goals': goals,
+        'team_1': team_1,
+        'team_2': team_2,
         'T': T
     }
 
-    # read the code from netball.stan
-    model_code = open('./model_scripts/netball.stan').read()
-    if progressive:
-        for i in range(1, N + 1):
-            stan_data['N'] = i
-            stan_data['goals'] = df[['home_score', 'away_score']].values[:i]
-            stan_data['team_1'] = df['Team_1_ID'].values[:i]
-            stan_data['team_2'] = df['Team_2_ID'].values[:i]
-            posterior = stan.build(model_code, data=stan_data)
-            fit = posterior.sample(num_chains=4, num_samples=1000)
-            m = fit.to_frame().mean()
-            offence_means = m[m.index.str.contains('offence')]
-            defence_means = m[m.index.str.contains('defence')]
 
-            print(offence_means)
-            print(defence_means)
-            print(T)
-            # scatter plot the mean values
-            # plt.scatter(offence_means, defence_means, c="black", s=200)
-            # plt.show()
-            # plt.cla()
-    else:
-        stan_data['N'] = N
-        stan_data['goals'] = df[['home_score', 'away_score']].values
-        stan_data['team_1'] = df['Team_1_ID'].values
-        stan_data['team_2'] = df['Team_2_ID'].values
-        posterior = stan.build(model_code, data=stan_data)
-        fit = posterior.sample(num_chains=4, num_samples=1000) 
-        
+    print(stan_data)
+
+    posterior = stan.build(model_code, data=stan_data)
+    fit = posterior.sample(num_chains=4, num_samples=1000)
 
     return fit
 
+def run_model(data, OUTPUTS_FOLDER = "./model_scripts/outputs", FINAL_ONLY = False):
+    # group by round
+    rounds = data.groupby('round_index')
+    bracket = data["bracket"].iloc[0]
+    # now we want to fit the model considering all rounds up to and including the current round
+
+    # Get number of teams
+    teams = pd.read_csv(f'./model_scripts/id_to_name/{bracket}.csv')
+    T = len(teams)
+
+    for i, (round_index, round_data) in enumerate(rounds):
+
+        if FINAL_ONLY and i != len(rounds) - 1:
+            continue
+        # create folder if it doesn't exist
+        Path(f'{OUTPUTS_FOLDER}/{bracket}/{round_index}').mkdir(parents=True, exist_ok=True)
+
+        all_data = data[data['round_index'] <= round_index]
+
+
+
+        # fit the model
+        fit = fit_model(
+            N=len(all_data),
+            T=T,
+            goals=all_data[['home_score', 'away_score']].values,
+            team_1=all_data['Team_1_ID'].values.astype(int),
+            team_2=all_data['Team_2_ID'].values.astype(int)
+        )
+
+        # save the model
+        fit.to_frame().to_csv(f'{OUTPUTS_FOLDER}/{bracket}/{round_index}/model.csv', index=False)
+
+
 if __name__ == "__main__":
-    
     # loop through every file in data/
     for filename in os.listdir('./model_scripts/data'):
         if filename.endswith('.csv'):
-            print(filename)
             data = pd.read_csv(f'./model_scripts/data/{filename}')
             data = data[data['bye'] == False]
 
-            print(data.columns)
-            fit = fit_stan_model(data, progressive=False)
-
-            fit.to_frame().to_csv(f'./model_scripts/outputs/{filename}', index=False)
+            run_model(data, FINAL_ONLY = True)

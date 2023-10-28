@@ -64,6 +64,7 @@ def scrape_uwa_sports_page(url):
     
     return rounds_data
 
+
 def scrape_sports_url(url):
     output = scrape_uwa_sports_page(url)
 
@@ -75,8 +76,6 @@ def scrape_sports_url(url):
             game_data['date_time'] = game_data['date_time'].replace("0:00am", "12:00am")
             bye = True
 
-            
-
         if 'Bye' in game_data['home_team'] or 'Bye' in game_data['away_team']:
             bye = True
 
@@ -87,7 +86,29 @@ def scrape_sports_url(url):
 
         processed.append(game_data)
 
-    pd.DataFrame(processed).to_csv(f'model_scripts/data/{processed[0]["bracket"]}.csv', index=False)
+    data = pd.DataFrame(processed)
+
+    teams = pd.DataFrame()
+    teams['Team_Name'] = pd.concat([data['home_team'], data['away_team']])
+    teams = teams.drop_duplicates().reset_index(drop=True)
+
+    # remove the "Bye" team
+    teams = teams[teams['Team_Name'] != 'Bye']
+
+    teams['Team_ID'] = teams.index
+
+    # the team Ids actually need to start from 1 to work in Stan
+    teams['Team_ID'] = teams['Team_ID'] + 1
+
+    data = pd.merge(data, teams, left_on='home_team', right_on='Team_Name', how='left')
+    data = data.rename(columns={'Team_ID': 'Team_1_ID'})
+    data = pd.merge(data, teams, left_on='away_team', right_on='Team_Name', how='left')
+    data = data.rename(columns={'Team_ID': 'Team_2_ID'})
+
+    teams.to_csv(f'./model_scripts/id_to_name/{data.iloc[0]["bracket"]}.csv', index=False)
+
+    data.to_csv(f'model_scripts/data/{processed[0]["bracket"]}.csv', index=False)
+
 
 if __name__ == "__main__":
     urls = [

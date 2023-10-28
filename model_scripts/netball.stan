@@ -27,11 +27,30 @@ model {
 
 generated quantities {
   int y_rep[T, T, 2];  // simulated (replicated) data for each observation
-  
+
   for (i in 1:T) {
     for (j in 1:T) {
         y_rep[i, j, 1] = poisson_log_rng(alpha + offence[i] - defence[j]);
         y_rep[i, j, 2] = poisson_log_rng(alpha + offence[j] - defence[i]);
     }
+  }
+
+  
+  int wins[T, T];      // Number of times team i beats team j in the simulations
+  real win_prob[T, T]; // Proportion of times team i beats team j
+    
+  for (i in 1:T) {
+      for (j in 1:T) {
+          wins[i, j] = 0;
+          for (k in 1:1000) { // Simulating 1000 hypothetical games
+              int goals_i = poisson_log_rng(alpha + offence[i] - defence[j]);
+              int goals_j = poisson_log_rng(alpha + offence[j] - defence[i]);
+              
+              if (goals_i > goals_j) {
+                  wins[i, j] += 1; 
+              }
+          }
+          win_prob[i, j] = wins[i, j] / 1000.0;
+      }
   }
 }
