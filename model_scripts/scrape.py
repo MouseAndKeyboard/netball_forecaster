@@ -89,23 +89,28 @@ def scrape_sports_url(url):
     data = pd.DataFrame(processed)
 
     teams = pd.DataFrame()
+    
     teams['Team_Name'] = pd.concat([data['home_team'], data['away_team']])
     teams = teams.drop_duplicates().reset_index(drop=True)
 
     # remove the "Bye" team
-    teams = teams[teams['Team_Name'] != 'Bye']
-
+    
     teams['Team_ID'] = teams.index
 
     # the team Ids actually need to start from 1 to work in Stan
     teams['Team_ID'] = teams['Team_ID'] + 1
+
+    teams.to_csv(f'./model_scripts/id_to_name/{data.iloc[0]["bracket"]}.csv', index=False)
+
+    teams = teams[teams['Team_Name'] != 'Bye']
 
     data = pd.merge(data, teams, left_on='home_team', right_on='Team_Name', how='left')
     data = data.rename(columns={'Team_ID': 'Team_1_ID'})
     data = pd.merge(data, teams, left_on='away_team', right_on='Team_Name', how='left')
     data = data.rename(columns={'Team_ID': 'Team_2_ID'})
 
-    teams.to_csv(f'./model_scripts/id_to_name/{data.iloc[0]["bracket"]}.csv', index=False)
+
+
 
     data.to_csv(f'model_scripts/data/{processed[0]["bracket"]}.csv', index=False)
 
@@ -113,18 +118,11 @@ def scrape_sports_url(url):
 if __name__ == "__main__":
     urls = [
         # tuesday league
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1474766&seasonid=1125', # D1
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1474767&seasonid=1125', # D2 
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1474768&seasonid=1125', # D3
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1489115&seasonid=1125', # D4
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1489116&seasonid=1125', # D5
-        # monday league
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1489111&seasonid=1125', # D7
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1474764&seasonid=1125', # D6
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1474763&seasonid=1125', # D5
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1474762&seasonid=1125', # D4
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1474761&seasonid=1125', # D3
-        'https://uwaresults.fusesport.com/drawresult.asp?id=1474760&seasonid=1125', # D2
+        # 'https://uwaresults.fusesport.com/drawresult.asp?id=1504265&seasonid=1155', # D1
+        # 'https://uwaresults.fusesport.com/drawresult.asp?id=1504266&seasonid=1155', # D2
+        # 'https://uwaresults.fusesport.com/drawresult.asp?id=1504267&seasonid=1155', # D3
+        'https://uwaresults.fusesport.com/drawresult.asp?id=1504268&seasonid=1155' # D4
+        # 'https://uwaresults.fusesport.com/drawresult.asp?id=1504269&seasonid=1155', # D5
     ]
 
     for url in urls:

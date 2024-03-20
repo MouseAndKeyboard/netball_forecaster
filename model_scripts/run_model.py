@@ -44,7 +44,9 @@ def run_model(data, OUTPUTS_FOLDER = "./model_scripts/outputs", FINAL_ONLY = Fal
 
         all_data = data[data['round_index'] <= round_index]
 
-
+        print(all_data)
+        print(all_data['Team_1_ID'].values.astype(int))
+        print(all_data['Team_2_ID'].values.astype(int))
 
         # fit the model
         fit = fit_model(

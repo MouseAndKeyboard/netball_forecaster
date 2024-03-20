@@ -10,6 +10,7 @@ ID_TO_NAME_DIR = Path('./model_scripts/id_to_name')
 
 # loop through each csv file in outputs directory
 for file in os.listdir(OUTPUTS_DIR):
+    
     if file.endswith('.csv'):
         # read the csv into a dataframe
         df = pd.read_csv(OUTPUTS_DIR / file)
