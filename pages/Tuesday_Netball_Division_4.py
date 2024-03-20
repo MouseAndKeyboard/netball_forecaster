@@ -7,7 +7,7 @@ st.set_page_config(layout="wide")
 DIVISION = 4
 
 
-title = f"2024 Semester 2 Social Sports - Netball - Tuesday Netball - Division {DIVISION}"
+title = f"2024 Semester 1 Social Sports - Netball - Tuesday Netball - Division {DIVISION}"
 
 image = Image.open(f"./model_scripts/plots/{title}.png")
 
